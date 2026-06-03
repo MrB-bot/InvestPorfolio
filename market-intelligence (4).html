@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WALL ST. INTEL</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050810;--surface:#0d1421;--surface2:#121d2e;--border:#1a2840;--accent:#00d4ff;--gold:#f5c842;--green:#00ff88;--red:#ff3355;--warn:#ff9500;--purple:#a855f7;--text:#e8edf5;--muted:#4a6080}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 40% at 20% 10%,rgba(0,212,255,.04) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(168,85,247,.04) 0%,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(0,212,255,.02) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(0,212,255,.02) 40px);pointer-events:none;z-index:0}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 60px;position:relative;z-index:1}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;background:linear-gradient(90deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;margin-top:2px}
+.date-badge{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);padding:4px 10px;border-radius:4px}
+.live{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;color:var(--green);margin-top:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.ticker-bar{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;display:flex;gap:24px;overflow-x:auto;margin-bottom:20px;scrollbar-width:none}
+.ticker-bar::-webkit-scrollbar{display:none}
+.ti{display:flex;flex-direction:column;align-items:center;min-width:fit-content;gap:2px}
+.ti-sym{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px}
+.ti-price{font-family:'DM Mono',monospace;font-size:13px;font-weight:500}
+.ti-chg{font-family:'DM Mono',monospace;font-size:10px}
+.up{color:var(--green)}.down{color:var(--red)}
+.sentiment{border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px;border:1px solid}
+.sentiment.bear{background:rgba(255,51,85,.05);border-color:rgba(255,51,85,.3)}
+.sentiment h3{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;margin-bottom:3px}
+.sentiment p{font-size:12px;color:var(--muted);line-height:1.5}
+.ai-box{background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(168,85,247,.04));border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:16px;margin-bottom:20px}
+.ai-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ai-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ai-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase}
+#ai-output{font-size:13px;line-height:1.7;color:var(--text);min-height:50px;white-space:pre-wrap}
+.ai-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(168,85,247,.15));border:1px solid rgba(0,212,255,.3);color:var(--accent);padding:9px 18px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .2s;margin-top:12px}
+.ai-btn:hover{background:linear-gradient(135deg,rgba(0,212,255,.25),rgba(168,85,247,.25));transform:translateY(-1px)}
+.ai-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle}
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);padding:4px;border-radius:8px;flex-wrap:wrap}
+.tab{padding:7px 12px;border-radius:6px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;color:var(--muted);transition:all .15s;border:none;background:none}
+.tab.active{background:var(--surface);color:var(--accent);border:1px solid var(--border)}
+.tab-content{display:none}.tab-content.active{display:block}
+.slabel{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.slabel::after{content:'';flex:1;height:1px;background:var(--border)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+.card-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.srow:last-child{border-bottom:none}
+.sym{font-family:'DM Mono',monospace;font-size:13px;font-weight:500}
+.sname{font-size:10px;color:var(--muted);margin-top:1px}
+.sprice{font-family:'DM Mono',monospace;font-size:13px}
+.schg{font-family:'DM Mono',monospace;font-size:10px;padding:1px 6px;border-radius:3px}
+.cup{background:rgba(0,255,136,.12);color:var(--green)}.cdown{background:rgba(255,51,85,.12);color:var(--red)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px}
+.b-buy{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.2)}
+.b-sell{background:rgba(255,51,85,.12);color:var(--red);border:1px solid rgba(255,51,85,.2)}
+.b-hold{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2)}
+.b-watch{background:rgba(255,149,0,.1);color:var(--warn);border:1px solid rgba(255,149,0,.2)}
+.b-reduce{background:rgba(168,85,247,.1);color:var(--purple);border:1px solid rgba(168,85,247,.2)}
+.psummary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+@media(max-width:600px){.psummary{grid-template-columns:1fr 1fr}}
+.pstat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.pstat-val{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px}
+.pstat-label{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px}
+.rtable{width:100%;border-collapse:collapse}
+.rtable th{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+.rtable td{padding:7px 8px;border-bottom:1px solid var(--border);font-size:11px;vertical-align:middle}
+.rtable tr:last-child td{border-bottom:none}
+.rtable tr:hover td{background:rgba(255,255,255,.02)}
+
+/* NEWS ITEM - ENHANCED WITH TIMESTAMP */
+.nitem{padding:12px 0;border-bottom:1px solid var(--border)}
+.nitem:last-child{border-bottom:none}
+.nmeta{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.nsrc{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+.ndate{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);padding:1px 7px;border-radius:3px}
+.ntime-exact{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)}
+.nimp{margin-left:auto;font-size:9px;padding:1px 6px;border-radius:3px;font-family:'DM Mono',monospace}
+.ih{background:rgba(255,51,85,.15);color:var(--red)}.im{background:rgba(255,149,0,.15);color:var(--warn)}.il{background:rgba(0,212,255,.1);color:var(--accent)}
+.ntitle{font-size:12px;line-height:1.5;margin-bottom:5px;color:var(--text)}
+.nquote{font-size:11px;color:var(--muted);font-style:italic;border-left:2px solid var(--border);padding-left:8px;margin-bottom:5px;line-height:1.5}
+.ntags{display:flex;gap:4px;flex-wrap:wrap}
+.ntag{font-family:'DM Mono',monospace;font-size:9px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--muted)}
+
+/* TRUMP ENHANCED */
+.tcard{background:linear-gradient(135deg,rgba(245,200,66,.06),rgba(255,51,85,.06));border:1px solid rgba(245,200,66,.25);border-radius:12px;padding:14px;margin-bottom:14px}
+.titem{padding:10px 0;border-bottom:1px solid rgba(245,200,66,.1)}
+.titem:last-child{border-bottom:none}
+.titem-meta{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap}
+.tplatform{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.2);padding:1px 7px;border-radius:3px}
+.tdate{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)}
+.tquote{font-size:11px;color:var(--warn);font-style:italic;border-left:2px solid rgba(245,200,66,.3);padding-left:8px;margin:5px 0;line-height:1.5}
+
+/* INFLUENCER ENHANCED */
+.iitem{display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:8px}
+.iav{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--border)}
+.iname{font-size:13px;font-weight:600;margin-bottom:2px}
+.irole{font-size:10px;color:var(--muted);margin-bottom:4px}
+.iaction{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.idate-badge{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.15);padding:1px 7px;border-radius:3px}
+.iimpact{font-size:11px;color:var(--warn);line-height:1.5}
+.iquote{font-size:11px;color:var(--muted);font-style:italic;border-left:2px solid var(--border);padding-left:8px;margin-top:4px;line-height:1.5}
+
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="logo">WALL ST. INTEL</div>
+    <div class="logo-sub">MARKET INTELLIGENCE · JUN 03 2026</div>
+  </div>
+  <div style="text-align:right">
+    <div class="date-badge">MIÉ JUN 03, 2026</div>
+    <div class="live"><div class="dot"></div>MERCADO ABIERTO</div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ti"><span class="ti-sym">S&P500</span><span class="ti-price">7,614</span><span class="ti-chg down">▼-0.4%</span></div>
+  <div class="ti"><span class="ti-sym">NASDAQ</span><span class="ti-price">24,890</span><span class="ti-chg down">▼-0.6%</span></div>
+  <div class="ti"><span class="ti-sym">DOW</span><span class="ti-price">51,180</span><span class="ti-chg down">▼-0.3%</span></div>
+  <div class="ti"><span class="ti-sym">BTC</span><span class="ti-price">$66,965</span><span class="ti-chg down">▼-6.5%</span></div>
+  <div class="ti"><span class="ti-sym">ETH</span><span class="ti-price">$1,883</span><span class="ti-chg down">▼-7.3%</span></div>
+  <div class="ti"><span class="ti-sym">SOL</span><span class="ti-price">$74.90</span><span class="ti-chg down">▼-0.9%</span></div>
+  <div class="ti"><span class="ti-sym">XRP</span><span class="ti-price">$1.54</span><span class="ti-chg up">▲+2.1%</span></div>
+  <div class="ti"><span class="ti-sym">LINK</span><span class="ti-price">$8.48</span><span class="ti-chg down">▼-0.65%</span></div>
+  <div class="ti"><span class="ti-sym">VOO</span><span class="ti-price">$698</span><span class="ti-chg down">▼-0.4%</span></div>
+  <div class="ti"><span class="ti-sym">QQQM</span><span class="ti-price">$307</span><span class="ti-chg down">▼-0.6%</span></div>
+  <div class="ti"><span class="ti-sym">SCHD</span><span class="ti-price">$31.13</span><span class="ti-chg up">▲+0.4%</span></div>
+  <div class="ti"><span class="ti-sym">NVDA</span><span class="ti-price">$221</span><span class="ti-chg down">▼-1.9%</span></div>
+  <div class="ti"><span class="ti-sym">OIL/WTI</span><span class="ti-price">$92.16</span><span class="ti-chg up">▲+5.5%</span></div>
+  <div class="ti"><span class="ti-sym">GOLD</span><span class="ti-price">$4,490</span><span class="ti-chg up">▲+0.4%</span></div>
+</div>
+
+<!-- SENTIMENT -->
+<div class="sentiment bear">
+  <div style="font-size:28px;flex-shrink:0">🐻</div>
+  <div>
+    <h3 style="color:var(--red)">HOY: PULLBACK TÉCNICO — CRYPTO EN CAÍDA FUERTE</h3>
+    <p>S&P 500 en máximos históricos (7,600+) pero corrige hoy. BTC -6.5% y ETH -7.3% — inversores rotan de crypto a IA/stocks. Petróleo +5.5% por conflicto Irán. <strong style="color:var(--warn)">XRP sube +2.1% contra tendencia por CLARITY Act en Senado.</strong></p>
+  </div>
+</div>
+
+<!-- AI BOX -->
+<div class="ai-box">
+  <div class="ai-header">
+    <div class="ai-icon">🤖</div>
+    <div>
+      <div class="ai-title">ANÁLISIS IA EN TIEMPO REAL</div>
+      <div style="font-size:10px;color:var(--muted)">Powered by Claude · Solo funciona dentro de Claude.ai</div>
+    </div>
+  </div>
+  <div id="api-key-section" style="margin-bottom:12px">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:'DM Mono',monospace">🔑 ANTHROPIC API KEY — <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--accent);text-decoration:none">Obtén una gratis aquí →</a></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+      <button onclick="saveKey()" style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--accent);padding:8px 14px;border-radius:6px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;white-space:nowrap">GUARDAR</button>
+    </div>
+    <div id="key-status" style="font-size:10px;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace"></div>
+  </div>
+  <div id="ai-output"><span style="color:var(--muted);font-size:13px">1. Ingresa tu API key arriba → 2. Presiona el botón para análisis IA...</span></div>
+  <button class="ai-btn" id="ai-btn" onclick="runAI()">⚡ GENERAR ANÁLISIS DEL DÍA</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="st('stocks',this)">STOCKS</button>
+  <button class="tab" onclick="st('crypto',this)">CRYPTO</button>
+  <button class="tab" onclick="st('portafolio',this)">MI PORTAFOLIO</button>
+  <button class="tab" onclick="st('noticias',this)">NOTICIAS</button>
+  <button class="tab" onclick="st('trump',this)">TRUMP</button>
+  <button class="tab" onclick="st('influencers',this)">INFLUENCERS</button>
+</div>
+
+<!-- TAB STOCKS -->
+<div id="tab-stocks" class="tab-content active">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">🟢 TOP GAINERS HOY</div>
+      <div class="srow"><div><div class="sym">MRVL</div><div class="sname">Marvell Technology</div></div><div style="text-align:right"><div class="sprice up">$98.40</div><div class="schg cup">+32.0%</div></div></div>
+      <div class="srow"><div><div class="sym">HPE</div><div class="sname">Hewlett Packard</div></div><div style="text-align:right"><div class="sprice up">$24.80</div><div class="schg cup">+19.0%</div></div></div>
+      <div class="srow"><div><div class="sym">AVGO</div><div class="sname">Broadcom</div></div><div style="text-align:right"><div class="sprice up">$312.50</div><div class="schg cup">+5.0%</div></div></div>
+      <div class="srow"><div><div class="sym">CSCO</div><div class="sname">Cisco Systems</div></div><div style="text-align:right"><div class="sprice up">$62.10</div><div class="schg cup">+5.5%</div></div></div>
+      <div class="srow"><div><div class="sym">SLB</div><div class="sname">Schlumberger</div></div><div style="text-align:right"><div class="sprice up">$40.20</div><div class="schg cup">+3.8%</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔴 TOP LOSERS HOY</div>
+      <div class="srow"><div><div class="sym">QCOM</div><div class="sname">Qualcomm</div></div><div style="text-align:right"><div class="sprice down">$158.40</div><div class="schg cdown">-8.8%</div></div></div>
+      <div class="srow"><div><div class="sym">NKE</div><div class="sname">Nike</div></div><div style="text-align:right"><div class="sprice down">$68.20</div><div class="schg cdown">-4.8%</div></div></div>
+      <div class="srow"><div><div class="sym">MSFT</div><div class="sname">Microsoft</div></div><div style="text-align:right"><div class="sprice down">$460.52</div><div class="schg cdown">-4.2%</div></div></div>
+      <div class="srow"><div><div class="sym">GOOGL</div><div class="sname">Alphabet</div></div><div style="text-align:right"><div class="sprice down">$178.40</div><div class="schg cdown">-3.9%</div></div></div>
+      <div class="srow"><div><div class="sym">CRM</div><div class="sname">Salesforce</div></div><div style="text-align:right"><div class="sprice down">$248.30</div><div class="schg cdown">-4.2%</div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚡ POR QUÉ SE MUEVEN ASÍ</div>
+    <div class="grid2" style="margin-bottom:0">
+      <div>
+        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;margin-bottom:8px">▲ SUBE</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.8">• <strong style="color:var(--text)">MRVL +32%:</strong> Jensen Huang en COMPUTEX llamó a Marvell "el próximo $1T"<br>• <strong style="color:var(--text)">SLB +3.8%:</strong> Petróleo +5.5% por guerra Irán<br>• <strong style="color:var(--text)">AVGO +5%:</strong> Earnings mañana jun 4</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--red);font-family:'DM Mono',monospace;margin-bottom:8px">▼ BAJA</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.8">• <strong style="color:var(--text)">QCOM -8.8%:</strong> NVDA lanzó chip CPU RTX Spark competidor<br>• <strong style="color:var(--text)">GOOGL -3.9%:</strong> Venta de $80B en acciones para IA<br>• <strong style="color:var(--text)">Índices:</strong> Pullback técnico normal post-récords</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB CRYPTO -->
+<div id="tab-crypto" class="tab-content">
+  <div class="psummary">
+    <div class="pstat"><div class="pstat-val" style="color:var(--gold)">$1,751</div><div class="pstat-label">TOTAL CRYPTO</div></div>
+    <div class="pstat"><div class="pstat-val" style="color:var(--red)">-6.5%</div><div class="pstat-label">CRYPTO HOY</div></div>
+    <div class="pstat"><div class="pstat-val" style="color:var(--green)">6</div><div class="pstat-label">COINS SÓLIDAS</div></div>
+    <div class="pstat"><div class="pstat-val" style="color:var(--red)">4</div><div class="pstat-label">VENDER YA</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 TU CRYPTO — ANÁLISIS COMPLETO</div>
+    <table class="rtable">
+      <thead><tr><th>COIN</th><th>COINS</th><th>VALOR</th><th>ACCIÓN</th><th>POR QUÉ</th></tr></thead>
+      <tbody>
+        <tr><td><strong>BTC</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">0.03983</td><td><strong style="color:var(--gold)">$3,238</strong> 🏆</td><td><span class="badge b-hold">◆ HOLD</span></td><td style="color:var(--muted);font-size:11px">Mayor posición. Zona de acumulación. Usa USDT si baja a $65K.</td></tr>
+        <tr><td><strong>SOL</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">2.63 total</td><td><strong style="color:var(--gold)">$329</strong></td><td><span class="badge b-hold">◆ HOLD</span></td><td style="color:var(--muted);font-size:11px">RWA en Solana superó $2B en Q1. Fundamentos fuertes.</td></tr>
+        <tr><td><strong>ETH</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">0.155 total</td><td><strong style="color:var(--gold)">$357</strong></td><td><span class="badge b-hold">◆ HOLD</span></td><td style="color:var(--muted);font-size:11px">Mastercard integró RLUSD en Ethereum — señal institucional fuerte.</td></tr>
+        <tr><td><strong>LILPEPE</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">93,324</td><td><strong style="color:var(--red)">$178</strong></td><td><span class="badge b-sell">✕ VENDE HOY</span></td><td style="color:var(--muted);font-size:11px">Meme coin. Tu mayor posición especulativa. Mueve a BTC/SOL.</td></tr>
+        <tr><td><strong>TAO</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">0.604</td><td><strong style="color:var(--gold)">$184</strong></td><td><span class="badge b-hold">◆ HOLD</span></td><td style="color:var(--muted);font-size:11px">IA descentralizada. 7.41% APY staking. Alta volatilidad pero real.</td></tr>
+        <tr><td><strong>USDT + Fut.</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">130.53</td><td><strong style="color:var(--gold)">$130</strong></td><td><span class="badge b-buy">▲ USA HOY</span></td><td style="color:var(--muted);font-size:11px">Cash disponible. Compra BTC si llega a $65,000 hoy.</td></tr>
+        <tr><td><strong>XRP</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">47.88</td><td><strong style="color:var(--gold)">$74</strong></td><td><span class="badge b-buy">▲ ACUMULA</span></td><td style="color:var(--muted);font-size:11px">Sube +2.1% HOY contra tendencia. CLARITY Act catalizador. Posición pequeña — aumenta.</td></tr>
+        <tr><td><strong>LINK</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">6.21</td><td><strong style="color:var(--gold)">$65</strong></td><td><span class="badge b-hold">◆ HOLD</span></td><td style="color:var(--muted);font-size:11px">Infraestructura DeFi. Mastercard/RLUSD lo beneficia directamente.</td></tr>
+        <tr><td><strong>QNT</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">0.7584</td><td><strong style="color:var(--gold)">$60</strong></td><td><span class="badge b-watch">⚠ EVALÚA</span></td><td style="color:var(--muted);font-size:11px">Interoperabilidad blockchain. Posición pequeña.</td></tr>
+        <tr><td><strong>ADA</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">187.86</td><td><strong style="color:var(--gold)">$52</strong></td><td><span class="badge b-watch">⚠ EVALÚA</span></td><td style="color:var(--muted);font-size:11px">Lento en desarrollo. Mantén o convierte a SOL.</td></tr>
+        <tr><td><strong>HYPER</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">3,491</td><td><strong style="color:var(--gold)">$47</strong></td><td><span class="badge b-watch">⚠ EVALÚA</span></td><td style="color:var(--muted);font-size:11px">Especulativo. Si no entiendes el proyecto, convierte a BTC.</td></tr>
+        <tr><td><strong>BNB</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">0.024</td><td><strong style="color:var(--gold)">$17</strong></td><td><span class="badge b-hold">◆ HOLD</span></td><td style="color:var(--muted);font-size:11px">Ecosistema Binance sólido. Posición pequeña.</td></tr>
+        <tr><td><strong>WLFI</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">99</td><td><strong style="color:var(--red)">$7</strong></td><td><span class="badge b-sell">✕ VENDE</span></td><td style="color:var(--muted);font-size:11px">Proyecto Trump. Riesgo regulatorio extremo.</td></tr>
+        <tr><td><strong>PEPE</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">1,735,715</td><td><strong style="color:var(--red)">$8</strong></td><td><span class="badge b-sell">✕ VENDE</span></td><td style="color:var(--muted);font-size:11px">Meme coin. Mueve a BTC.</td></tr>
+        <tr><td><strong>PUMP</strong></td><td style="font-family:'DM Mono',monospace;font-size:10px">2,471</td><td><strong style="color:var(--red)">$5</strong></td><td><span class="badge b-sell">✕ VENDE</span></td><td style="color:var(--muted);font-size:11px">Especulativo puro. Sin fundamento.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card" style="background:rgba(0,255,136,.03);border-color:rgba(0,255,136,.2)">
+    <div class="card-title" style="color:var(--green)">💡 ESTRATEGIA CRYPTO HOY</div>
+    <div style="font-size:12px;color:var(--muted);line-height:2">
+      <strong style="color:var(--red)">Vende hoy:</strong> LILPEPE + WLFI + PEPE + PUMP = <strong style="color:var(--text)">~$198 liberados</strong><br>
+      <strong style="color:var(--green)">Compra con ese capital:</strong> BTC 50% + XRP 30% + SOL 20%<br>
+      <strong style="color:var(--accent)">Usa USDT ($130):</strong> Si BTC llega a $65,000 — compra inmediatamente<br>
+      <strong style="color:var(--gold)">XRP:</strong> Posición pequeña ($74) con catalizador real (CLARITY Act). Acumula más
+    </div>
+  </div>
+</div>
+
+<!-- TAB MI PORTAFOLIO -->
+<div id="tab-portafolio" class="tab-content">
+  <div class="psummary">
+    <div class="pstat"><div class="pstat-val" style="color:var(--gold)">~$7,751</div><div class="pstat-label">TOTAL EST.</div></div>
+    <div class="pstat"><div class="pstat-val" style="color:var(--green)">22%+</div><div class="pstat-label">PERFORMANCE</div></div>
+    <div class="pstat"><div class="pstat-val" style="color:var(--accent)">~$6,000</div><div class="pstat-label">STOCKS IBKR</div></div>
+    <div class="pstat"><div class="pstat-val" style="color:var(--purple)">$1,751</div><div class="pstat-label">CRYPTO</div></div>
+  </div>
+  <div class="slabel">STOCKS — IBKR</div>
+  <div class="card">
+    <table class="rtable">
+      <thead><tr><th>TICKER</th><th>SHARES</th><th>PRECIO</th><th>VALOR EST.</th><th>ACCIÓN</th><th>ALERTA</th></tr></thead>
+      <tbody>
+        <tr><td><strong>VOO</strong></td><td>2.09</td><td>$698</td><td style="color:var(--gold)">$1,459</td><td><span class="badge b-hold">◆ HOLD</span></td><td style="font-size:10px;color:var(--warn)">Compra &lt;$660</td></tr>
+        <tr><td><strong>QQQM ✅</strong></td><td>2</td><td>$307</td><td style="color:var(--gold)">$614</td><td><span class="badge b-buy">▲ COMPRA MÁS</span></td><td style="font-size:10px;color:var(--warn)">Compra &lt;$285</td></tr>
+        <tr><td><strong>SCHD ✅</strong></td><td>16.24</td><td>$31.13</td><td style="color:var(--gold)">$505</td><td><span class="badge b-buy">▲ ACUMULA</span></td><td style="font-size:10px;color:var(--warn)">Siempre</td></tr>
+        <tr><td><strong>SCHG</strong></td><td>4.99</td><td>$30.53</td><td style="color:var(--gold)">$152</td><td><span class="badge b-hold">◆ HOLD</span></td><td style="font-size:10px;color:var(--warn)">Compra &lt;$26</td></tr>
+        <tr><td><strong>NVDA</strong></td><td>1.56</td><td>$221</td><td style="color:var(--gold)">$345</td><td><span class="badge b-hold">◆ HOLD</span></td><td style="font-size:10px;color:var(--warn)">Compra &lt;$195</td></tr>
+        <tr><td><strong>MSFT</strong></td><td>0.14</td><td>$460</td><td style="color:var(--gold)">$64</td><td><span class="badge b-hold">◆ HOLD</span></td><td style="font-size:10px;color:var(--warn)">Compra &lt;$420</td></tr>
+        <tr><td><strong>ORCL</strong></td><td>1.01</td><td>~$195</td><td style="color:var(--gold)">$197</td><td><span class="badge b-hold">◆ HOLD</span></td><td style="font-size:10px;color:var(--warn)">Compra &lt;$175</td></tr>
+        <tr><td><strong>LMT</strong></td><td>0.58</td><td>~$580</td><td style="color:var(--gold)">$336</td><td><span class="badge b-watch">⚠ EVALÚA</span></td><td style="font-size:10px;color:var(--warn)">Vende si ceasefire</td></tr>
+        <tr><td><strong>SLB</strong></td><td>2</td><td>$40.20</td><td style="color:var(--gold)">$80</td><td><span class="badge b-watch">⚠ EVALÚA</span></td><td style="font-size:10px;color:var(--warn)">Vende si ceasefire</td></tr>
+        <tr><td><strong>JEPI</strong></td><td>3</td><td>~$64</td><td style="color:var(--gold)">$192</td><td><span class="badge b-hold">◆ HOLD</span></td><td style="font-size:10px;color:var(--warn)">Alerta &lt;$58</td></tr>
+        <tr><td><strong>IBIT</strong></td><td>2</td><td>~$54</td><td style="color:var(--gold)">$108</td><td><span class="badge b-watch">⚠ ESPERA</span></td><td style="font-size:10px;color:var(--warn)">BTC soporte $65K</td></tr>
+        <tr><td><strong>MSTY</strong></td><td>6.38</td><td>~$21</td><td style="color:var(--warn)">$134</td><td><span class="badge b-reduce">▼ REDUCE</span></td><td style="font-size:10px;color:var(--warn)">Vende si &lt;$18</td></tr>
+        <tr><td><strong>JEPQ</strong></td><td>2</td><td>~$60</td><td style="color:var(--warn)">$120</td><td><span class="badge b-watch">⚠ EVALÚA</span></td><td style="font-size:10px;color:var(--warn)">Consolida en JEPI</td></tr>
+        <tr><td><strong>PRSO ❌</strong></td><td>100</td><td>~$1.62</td><td style="color:var(--red)">$162</td><td><span class="badge b-sell">✕ VENDE HOY</span></td><td style="font-size:10px;color:var(--red)">Going concern</td></tr>
+        <tr><td><strong>BITO ❌</strong></td><td>4</td><td>~$24</td><td style="color:var(--red)">$96</td><td><span class="badge b-sell">✕ VENDE HOY</span></td><td style="font-size:10px;color:var(--red)">Decay + BTC cae</td></tr>
+        <tr><td><strong>ETHA ❌</strong></td><td>6</td><td>~$25</td><td style="color:var(--red)">$150</td><td><span class="badge b-sell">✕ VENDE HOY</span></td><td style="font-size:10px;color:var(--red)">ETH cae -7.3%</td></tr>
+        <tr><td><strong>SMCI ❌</strong></td><td>2</td><td>~$45</td><td style="color:var(--red)">$90</td><td><span class="badge b-sell">✕ VENDE</span></td><td style="font-size:10px;color:var(--red)">No encaja perfil</td></tr>
+        <tr><td><strong>QQQ ❌</strong></td><td>1.37</td><td>~$600</td><td style="color:var(--red)">$822</td><td><span class="badge b-sell">✕ → QQQM</span></td><td style="font-size:10px;color:var(--warn)">Mueve a QQQM</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="slabel">PROGRESO DEL PLAN</div>
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:10px;font-size:12px"><span style="color:var(--green);font-size:16px">✅</span>Compré QQQM — 2 shares a $307 · Jun 3, 2026</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:12px"><span style="color:var(--green);font-size:16px">✅</span>Aumenté SCHD — 2 shares nuevas → 16.24 total · Jun 3, 2026</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:12px"><span style="color:var(--warn);font-size:16px">⏳</span>Vender PRSO + BITO + ETHA + SMCI → ~$498 liberados</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:12px"><span style="color:var(--warn);font-size:16px">⏳</span>Vender QQQ → comprar 2+ QQQM adicionales</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:12px"><span style="color:var(--warn);font-size:16px">⏳</span>Activar DRIP en IBKR (VOO, SCHD, JEPI, QQQM)</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:12px"><span style="color:var(--warn);font-size:16px">⏳</span>Vender LILPEPE + PEPE + WLFI + PUMP → ~$198 para BTC/XRP</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:12px"><span style="color:var(--warn);font-size:16px">⏳</span>Usar USDT ($130) si BTC llega a $65,000</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB NOTICIAS CON FECHAS Y HORAS -->
+<div id="tab-noticias" class="tab-content">
+  <div class="card">
+    <div class="card-title">📰 NOTICIAS CON FECHA Y HORA EXACTA</div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">TheStreet</span>
+        <span class="ndate">Mié Jun 03, 2026</span>
+        <span class="ntime-exact">~7:00 AM ET</span>
+        <span class="nimp ih">ALTO IMPACTO</span>
+      </div>
+      <div class="ntitle">Dow futures caen después de que los 3 índices cerraron en máximos históricos. S&P 500 cerró por primera vez sobre 7,600 (7,609.78) ayer. Nasdaq y Dow también en récords.</div>
+      <div class="ntags"><span class="ntag">VOO</span><span class="ntag">QQQM</span><span class="ntag">SCHG</span><span class="ntag">SCHD</span></div>
+    </div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">CNBC / Reuters</span>
+        <span class="ndate">Mié Jun 03, 2026</span>
+        <span class="ntime-exact">6:00 AM ET</span>
+        <span class="nimp ih">ALTO IMPACTO</span>
+      </div>
+      <div class="ntitle">Irán lanza misiles balísticos sobre Kuwait y Bahréin. EEUU realiza nuevos ataques en isla Qeshm y ataca tanker iraní. Petróleo WTI sube +5.5% a $92.16.</div>
+      <div class="ntags"><span class="ntag">SLB</span><span class="ntag">LMT</span><span class="ntag">OIL</span><span class="ntag">XLE</span></div>
+    </div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">Bitget / Gold Markets</span>
+        <span class="ndate">Mié Jun 03, 2026</span>
+        <span class="ntime-exact">~5:00 AM ET (Asia session)</span>
+        <span class="nimp ih">ALTO IMPACTO</span>
+      </div>
+      <div class="ntitle">Oro sube a $4,490/oz. Irán dice que está revisando propuesta de ceasefire de EEUU pero no ha comunicado con Washington en días. Trump dice negociaciones "continúan".</div>
+      <div class="ntags"><span class="ntag">GOLD</span><span class="ntag">OIL</span><span class="ntag">LMT</span></div>
+    </div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">CoinDesk / Yahoo Finance</span>
+        <span class="ndate">Mié Jun 03, 2026</span>
+        <span class="ntime-exact">6:53 AM ET</span>
+        <span class="nimp ih">ALTO IMPACTO</span>
+      </div>
+      <div class="ntitle">BTC flash crash. Precio abre en $66,667 (-6.5%). Flash crash borra $1.8B en posiciones apalancadas. ETFs spot BTC registran $1.42B en salidas. ETH abre en $1,857 (-7.3%).</div>
+      <div class="ntags"><span class="ntag">BTC</span><span class="ntag">ETH</span><span class="ntag">IBIT</span><span class="ntag">MSTY</span></div>
+    </div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">Yahoo Finance / Motley Fool</span>
+        <span class="ndate">Mar Jun 02, 2026</span>
+        <span class="ntime-exact">4:21 AM ET</span>
+        <span class="nimp ih">ALTO IMPACTO</span>
+      </div>
+      <div class="ntitle">Jensen Huang en COMPUTEX Taipei llama a Marvell "la próxima empresa de un trillón de dólares". MRVL sube +32% al día siguiente. Market cap de MRVL salta de $191B a $234B.</div>
+      <div class="nquote">"The next trillion-dollar company, ladies and gentlemen." — Jensen Huang, COMPUTEX Jun 2, 2026</div>
+      <div class="ntags"><span class="ntag">NVDA</span><span class="ntag">MRVL</span><span class="ntag">SCHG</span><span class="ntag">QQQM</span></div>
+    </div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">Motley Fool / CNBC</span>
+        <span class="ndate">Mar Jun 02, 2026</span>
+        <span class="ntime-exact">11:00 PM ET (May 31 keynote)</span>
+        <span class="nimp ih">ALTO IMPACTO</span>
+      </div>
+      <div class="ntitle">NVDA lanza RTX Spark — primer chip CPU para PCs. Laptops de todos los fabricantes lo tendrán este otoño. NVDA sube +6.3% en un día. QCOM cae -8.8% por competencia directa.</div>
+      <div class="ntags"><span class="ntag">NVDA</span><span class="ntag">QCOM</span><span class="ntag">MSFT</span><span class="ntag">QQQM</span></div>
+    </div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">Stocktwits / ARK Invest</span>
+        <span class="ndate">Mar Jun 02, 2026</span>
+        <span class="ntime-exact">12:04 AM ET</span>
+        <span class="nimp im">MEDIO IMPACTO</span>
+      </div>
+      <div class="ntitle">Cathie Wood (ARK Invest) compra 300,017 acciones de NVDA por $63.3 millones después del anuncio del chip RTX Spark en COMPUTEX. Simultáneamente vende $57M en AMD.</div>
+      <div class="ntags"><span class="ntag">NVDA</span><span class="ntag">SCHG</span><span class="ntag">QQQM</span></div>
+    </div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">CNBC / TheStreet</span>
+        <span class="ndate">Mar Jun 02, 2026</span>
+        <span class="ntime-exact">6:54 PM ET (cierre)</span>
+        <span class="nimp im">MEDIO IMPACTO</span>
+      </div>
+      <div class="ntitle">Alphabet anuncia venta de $80B en acciones para financiar expansión en IA. Berkshire Hathaway (Buffett) invierte $10B. GOOGL cae -3.9% en el día a pesar de tener flujo de capital positivo.</div>
+      <div class="ntags"><span class="ntag">GOOGL</span><span class="ntag">BRK.B</span><span class="ntag">QQQM</span></div>
+    </div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">CoinMarketCap / CoinGecko</span>
+        <span class="ndate">Mar Jun 02, 2026</span>
+        <span class="ntime-exact">Todo el día</span>
+        <span class="nimp im">MEDIO IMPACTO</span>
+      </div>
+      <div class="ntitle">CLARITY Act avanza en Senado de EEUU — define jurisdicción SEC vs CFTC para crypto. XRP sube contra tendencia. Mastercard expande settlement con RLUSD de Ripple en múltiples blockchains.</div>
+      <div class="ntags"><span class="ntag">XRP</span><span class="ntag">ETH</span><span class="ntag">LINK</span></div>
+    </div>
+
+    <div class="nitem">
+      <div class="nmeta">
+        <span class="nsrc">Reuters / CNBC</span>
+        <span class="ndate">Mié Jun 03, 2026</span>
+        <span class="ntime-exact">Esta semana</span>
+        <span class="nimp il">BAJO IMPACTO</span>
+      </div>
+      <div class="ntitle">Fed Chair Powell habla esta semana. PCE inflación al nivel más alto en casi 3 años. Mercado espera señal hawkish o dovish sobre tasas de interés futuras.</div>
+      <div class="ntags"><span class="ntag">VOO</span><span class="ntag">SCHD</span><span class="ntag">JEPI</span><span class="ntag">JEPQ</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TAB TRUMP CON FECHAS Y HORAS -->
+<div id="tab-trump" class="tab-content">
+  <div class="tcard">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <span style="font-size:22px">🇺🇸</span>
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--gold)">TRUMP — LO QUE DIJO Y CUÁNDO</div>
+        <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">Declaraciones con fecha, hora y plataforma exacta</div>
+      </div>
+    </div>
+
+    <div class="titem">
+      <div class="titem-meta">
+        <span class="tplatform">📞 CNBC Phone Interview</span>
+        <span class="tdate">Mar Jun 02, 2026 · Durante sesión de mercado ET</span>
+      </div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:5px">Trump le dijo al reportero Eamon Javers de CNBC que "couldn't care less" (no le importa) si las negociaciones de paz con Irán terminaron.</div>
+      <div class="tquote">"I couldn't care less if the peace negotiations are over." — Trump a CNBC, Jun 2, 2026</div>
+      <div style="font-size:10px;color:var(--gold);font-family:'DM Mono',monospace">📈 Petróleo subió · 📉 Mercado cayó brevemente</div>
+    </div>
+
+    <div class="titem">
+      <div class="titem-meta">
+        <span class="tplatform">📱 Truth Social</span>
+        <span class="tdate">Mar Jun 02, 2026 · Tarde ET (después del CNBC)</span>
+      </div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:5px">Horas después de su declaración a CNBC, Trump cambió el tono. Dijo haber tenido una llamada "muy productiva" con Netanyahu y que habló con Irán.</div>
+      <div class="tquote">"Had a very productive call with Israeli PM Netanyahu. Talks with Iran are continuing, at a rapid pace." — Truth Social, Jun 2, 2026</div>
+      <div style="font-size:10px;color:var(--gold);font-family:'DM Mono',monospace">📉 Petróleo bajó desde máximos · 📈 S&P 500 recuperó parte de las pérdidas</div>
+    </div>
+
+    <div class="titem">
+      <div class="titem-meta">
+        <span class="tplatform">📱 Truth Social / CNBC</span>
+        <span class="tdate">Mié Jun 03, 2026 · Sesión asiática</span>
+      </div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:5px">Trump insiste que las negociaciones con Irán continúan. Esto mientras Irán dice no haber comunicado con Washington en varios días — versiones contradictorias.</div>
+      <div class="tquote">"Negotiations are still ongoing." — Trump, Jun 3, 2026</div>
+      <div style="font-size:10px;color:var(--gold);font-family:'DM Mono',monospace">⚠ Mercado desconfía — versiones contradictorias generan volatilidad en petróleo</div>
+    </div>
+
+    <div class="titem">
+      <div class="titem-meta">
+        <span class="tplatform">🏛️ Anuncio Oficial / CNBC</span>
+        <span class="tdate">Mié Jun 03, 2026 · Mañana</span>
+      </div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:5px">EEUU propone nuevos aranceles del 25% a 60 economías por prácticas de trabajo forzado. Nueva ronda de tensiones comerciales globales.</div>
+      <div style="font-size:10px;color:var(--gold);font-family:'DM Mono',monospace">📉 Supply chain Asia · 📈 Manufactura local EEUU</div>
+    </div>
+
+    <div class="titem">
+      <div class="titem-meta">
+        <span class="tplatform">📊 SEC / Office of Gov. Ethics</span>
+        <span class="tdate">Mayo 2026 · Filing público</span>
+      </div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:5px">Filing del gobierno revela que Trump realizó 3,642 trades individuales en Q1 2026, entre $220M y $750M en volumen — 60 trades por día promedio mientras presidía.</div>
+      <div style="font-size:10px;color:var(--gold);font-family:'DM Mono',monospace">⚠ Conflicto de interés masivo — riesgo regulatorio y político para mercados</div>
+    </div>
+
+    <div style="margin-top:14px;padding:12px;background:rgba(245,200,66,.08);border-radius:8px">
+      <div style="font-size:10px;color:var(--gold);font-family:'DM Mono',monospace;margin-bottom:6px">⚡ ALERTA TÁCTICA — REGLA DE TRUMP</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">
+        Trump tiene un patrón: dice algo agresivo → mercado cae → horas después suaviza el tono → mercado sube.<br>
+        <strong style="color:var(--text)">Si Trump firma ceasefire con Irán:</strong> Vende SLB y LMT inmediatamente, compra VOO y QQQM.<br>
+        <strong style="color:var(--text)">Si conflicto escala:</strong> SLB y LMT siguen subiendo. WLFI sigue en riesgo extremo.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB INFLUENCERS CON FECHAS -->
+<div id="tab-influencers" class="tab-content">
+  <div class="card">
+    <div class="card-title">👑 10 INFLUENCERS — ACCIONES CON FECHA Y HORA EXACTA</div>
+
+    <div class="iitem">
+      <div class="iav">🤖</div>
+      <div style="flex:1">
+        <div class="iname">Jensen Huang — CEO NVIDIA</div>
+        <div class="irole">IA / Semiconductores / $5T market cap</div>
+        <div class="iaction">
+          <span class="idate-badge">Jun 02, 2026 · COMPUTEX Taipei · ~10:00 AM hora local (Sep 01, 11PM ET)</span>
+        </div>
+        <div class="iimpact">Llamó a Marvell Technology "la próxima empresa de un trillón de dólares" en escenario con CEO Matt Murphy. MRVL +32% al día siguiente. También anunció que Anthropic usa el nuevo chip Vera.</div>
+        <div class="iquote">"The next trillion-dollar company, ladies and gentlemen. We got a little work to do, but we're on our way." — Jensen Huang, COMPUTEX Jun 2</div>
+      </div>
+    </div>
+
+    <div class="iitem">
+      <div class="iav">🌙</div>
+      <div style="flex:1">
+        <div class="iname">Cathie Wood — ARK Invest</div>
+        <div class="irole">Tech disruptiva / ARK Innovation / ARKK</div>
+        <div class="iaction">
+          <span class="idate-badge">Jun 02, 2026 · 12:04 AM ET · Disclosure ARK</span>
+        </div>
+        <div class="iimpact">Compró 300,017 acciones de NVDA por $63.3M justo después del anuncio del RTX Spark en COMPUTEX. Simultáneamente vendió $57M en AMD. Señal: prefiere NVDA sobre AMD.</div>
+        <div class="iquote">Compra masiva registrada en filing diario de ARK Invest — 320% aumento en volumen de mensajes en Stocktwits sobre NVDA ese día.</div>
+      </div>
+    </div>
+
+    <div class="iitem">
+      <div class="iav">🏛️</div>
+      <div style="flex:1">
+        <div class="iname">Jerome Powell — Fed Chair</div>
+        <div class="irole">Federal Reserve / Tasas de interés</div>
+        <div class="iaction">
+          <span class="idate-badge">Esta semana · Jun 03-05, 2026 · Pendiente</span>
+        </div>
+        <div class="iimpact">Habla esta semana con PCE inflación al nivel más alto en 3 años. Si tono hawkish → SCHD y JEPI bajan. Si dovish → todo sube. Es el evento macroeconómico más importante del mes para tu portafolio.</div>
+        <div class="iquote">Cleveland Fed President Mester ya advirtió el Jun 3 sobre "presiones inflacionarias persistentes". Powell puede seguir ese tono.</div>
+      </div>
+    </div>
+
+    <div class="iitem">
+      <div class="iav">🇺🇸</div>
+      <div style="flex:1">
+        <div class="iname">Donald Trump — Presidente EEUU</div>
+        <div class="irole">Geopolítica / Aranceles / Crypto</div>
+        <div class="iaction">
+          <span class="idate-badge">Jun 02, 2026 · CNBC interview + Truth Social</span>
+        </div>
+        <div class="iimpact">Ver tab TRUMP para declaraciones exactas con hora. Dos declaraciones contradictorias sobre Irán el mismo día — primera movió petróleo +5%, segunda lo bajó desde máximos.</div>
+      </div>
+    </div>
+
+    <div class="iitem">
+      <div class="iav">💰</div>
+      <div style="flex:1">
+        <div class="iname">Warren Buffett — Berkshire Hathaway</div>
+        <div class="irole">Value Investing / $1T portafolio</div>
+        <div class="iaction">
+          <span class="idate-badge">Mar Jun 02, 2026 · Anuncio Alphabet</span>
+        </div>
+        <div class="iimpact">Berkshire invirtió $10B en Alphabet como parte de la ronda de $80B para IA. Cuando Buffett compra algo el mercado lo sigue — señal bullish en tech a largo plazo.</div>
+      </div>
+    </div>
+
+    <div class="iitem">
+      <div class="iav">🚀</div>
+      <div style="flex:1">
+        <div class="iname">Elon Musk — Tesla / xAI / DOGE Gov.</div>
+        <div class="irole">Tech / Crypto / Regulación gobierno</div>
+        <div class="iaction">
+          <span class="idate-badge">Sin declaración nueva hoy · Monitorear X</span>
+        </div>
+        <div class="iimpact">Jefe del DOGE gubernamental. Sus tweets mueven BTC ±5% fácil. No hay declaración nueva hoy pero cualquier comentario sobre crypto puede impactar tu posición en BTC e IBIT.</div>
+      </div>
+    </div>
+
+    <div class="iitem">
+      <div class="iav">☁️</div>
+      <div style="flex:1">
+        <div class="iname">Satya Nadella — CEO Microsoft</div>
+        <div class="irole">Cloud / IA Enterprise</div>
+        <div class="iaction">
+          <span class="idate-badge">Próximos earnings: Jul 28, 2026</span>
+        </div>
+        <div class="iimpact">MSFT cayó -4.2% hoy por toma de ganancias post-Q3 fuerte. Cloud creció +29% YoY. Sus earnings del 28 julio serán el próximo evento clave para tu posición en MSFT y QQQM.</div>
+      </div>
+    </div>
+
+    <div class="iitem">
+      <div class="iav">🏦</div>
+      <div style="flex:1">
+        <div class="iname">Jamie Dimon — CEO JPMorgan</div>
+        <div class="irole">Banca / Administra JEPI y JEPQ</div>
+        <div class="iaction">
+          <span class="idate-badge">Próxima distribución JEPI: ~Jun 05-10, 2026</span>
+        </div>
+        <div class="iimpact">Administra directamente JEPI y JEPQ que tienes en portafolio. Sus decisiones sobre covered calls afectan tu income mensual. Con PCE alto, las primas de opciones suben → más yield.</div>
+      </div>
+    </div>
+
+    <div class="iitem">
+      <div class="iav">⛓️</div>
+      <div style="flex:1">
+        <div class="iname">Brad Garlinghouse — CEO Ripple</div>
+        <div class="irole">XRP / Pagos globales / RLUSD</div>
+        <div class="iaction">
+          <span class="idate-badge">Jun 02, 2026 · Expansión RLUSD a Turquía</span>
+        </div>
+        <div class="iimpact">Ripple expandió RLUSD a 3 exchanges en Turquía — mercado de $200B en volumen crypto anual. Mastercard también integró RLUSD. Catalizadores directos para tu posición de 47.88 XRP.</div>
+      </div>
+    </div>
+
+    <div class="iitem">
+      <div class="iav">🛢️</div>
+      <div style="flex:1">
+        <div class="iname">Líderes Irán / OPEC+</div>
+        <div class="irole">Energía / Estrecho de Ormuz</div>
+        <div class="iaction">
+          <span class="idate-badge">Jun 03, 2026 · Ataques continuos esta mañana</span>
+        </div>
+        <div class="iimpact">Irán atacó Kuwait y Bahréin esta mañana. No ha comunicado con Washington en días. Mientras Estrecho de Ormuz siga bloqueado, petróleo en $90+. Esto beneficia tu SLB y LMT directamente.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<script>
+function st(name,el){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+function saveKey(){
+  const k=document.getElementById('api-key-input').value.trim();
+  if(!k||!k.startsWith('sk-ant')){
+    document.getElementById('key-status').innerHTML='<span style="color:var(--red)">⚠ API key inválida. Debe empezar con sk-ant...</span>';
+    return;
+  }
+  sessionStorage.setItem('ant_key',k);
+  document.getElementById('key-status').innerHTML='<span style="color:var(--green)">✅ API key guardada — ahora presiona GENERAR ANÁLISIS</span>';
+  document.getElementById('api-key-input').value='sk-ant••••••••••••••••';
+}
+
+// Load saved key on page load
+window.addEventListener('load',()=>{
+  const saved=sessionStorage.getItem('ant_key');
+  if(saved){
+    document.getElementById('api-key-input').value='sk-ant••••••••••••••••';
+    document.getElementById('key-status').innerHTML='<span style="color:var(--green)">✅ API key cargada</span>';
+  }
+});
+
+async function runAI(){
+  const btn=document.getElementById('ai-btn');
+  const out=document.getElementById('ai-output');
+  const key=sessionStorage.getItem('ant_key');
+
+  if(!key){
+    out.innerHTML=`<span style="color:var(--warn)">⚠ Primero ingresa tu API key de Anthropic arriba. <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--accent)">Obtén una gratis aquí →</a></span>`;
+    return;
+  }
+
+  btn.disabled=true;
+  out.innerHTML=`<span class="spinner"></span>&nbsp;<span style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">Analizando tu portafolio...</span>`;
+
+  const ctx=`
+PORTAFOLIO STOCKS (jun 3 2026): VOO 2.09@698 | QQQM 2@307 nuevo hoy | SCHD 16.24@31.13 aumentado hoy | SCHG 4.99 | NVDA 1.56@221 | MSFT 0.14@460 | JEPI 3 | IBIT 2 | ORCL 1.01 | LMT 0.58 | SLB 2
+PENDIENTE VENDER: PRSO(100), BITO(4), ETHA(6), SMCI(2), QQQ(1.37)→QQQM, MSTY reducir
+PORTAFOLIO CRYPTO: BTC 0.03983=$3,238 | SOL 2.63=$329 | ETH 0.155=$357 | TAO 0.604=$184 | XRP 47.88=$74 | LINK 6.21=$65 | USDT=$130 | ADA=$52 | QNT=$60 | HYPER=$47 | BNB=$17
+VENDER CRYPTO: LILPEPE($178)+WLFI($7)+PEPE($8)+PUMP($5)=$198
+MERCADO HOY: S&P500 pullback -0.4% post-7600 récord | BTC -6.5% flash crash $1.8B liquidaciones | XRP +2.1% CLARITY Act | Petróleo +5.5% Irán | MRVL +32% Jensen Huang COMPUTEX | NVDA RTX Spark lanzado | Cathie Wood compró 300K NVDA $63M | Powell habla esta semana PCE máximo 3 años
+`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "x-api-key":key,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body:JSON.stringify({
+        model:"claude-sonnet-4-5",
+        max_tokens:1000,
+        system:"Eres asesor financiero senior Wall Street y crypto guru. Directo y concreto. Español. Máximo 380 palabras. Párrafos cortos y bullets. Sin markdown. Da insights accionables para HOY con los tickers exactos.",
+        messages:[{role:"user",content:`Con estos datos dame: 1) Lectura del día para mi portafolio (2 líneas) 2) Las 3 acciones más importantes que debo tomar HOY 3) Oportunidad en crypto que la mayoría no ve 4) Un riesgo específico para mi portafolio esta semana. Datos: ${ctx}`}]
+      })
+    });
+    const d=await r.json();
+    if(d.error){
+      out.innerHTML=`<span style="color:var(--red)">Error API: ${d.error.message}</span>`;
+    } else {
+      const t=d.content?.find(b=>b.type==='text')?.text||'Sin respuesta.';
+      out.style.opacity='0';
+      out.textContent=t;
+      out.style.transition='opacity 0.5s';
+      setTimeout(()=>{out.style.opacity='1'},50);
+    }
+  }catch(e){
+    out.innerHTML=`<span style="color:var(--red)">Error de conexión: ${e.message}</span>`;
+  }
+  btn.disabled=false;
+  btn.textContent='🔄 ACTUALIZAR ANÁLISIS';
+}
+</script>
+</body>
+</html>
